@@ -1,0 +1,4 @@
+matplotlib
+numpy
+praw
+firebase-admin
