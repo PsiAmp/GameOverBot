@@ -25,7 +25,7 @@ source /opt/gameoverbot/env/bin/activate
 chown -R pythonapp:pythonapp /opt/gameoverbot
 
 # Put supervisor configuration in proper place
-cp /opt/gameoverbot/gameoverbot-app.conf /etc/supervisor/conf.d/gameoverbot-app.conf
+cp /opt/gameoverbot/conf/gameoverbot-app.conf /etc/supervisor/conf.d/gameoverbot-app.conf
 
 # Start service via supervisorctl
 supervisorctl reread
