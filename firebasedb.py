@@ -17,7 +17,6 @@ def add_active_submission(submission):
     db.collection(u'active_submissions_test').document(submission.submission_id).set(submission.to_dict())
 
 
-
 def get_active_submissions():
     docs = db.collection(u'active_submissions_test').stream()
     submissions = []

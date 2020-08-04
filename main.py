@@ -33,12 +33,20 @@ def fetch_submissions(reddit):
     for reddit_submission in subreddit.stream.submissions():
         submission = Submission_model.from_reddit_submission(reddit_submission)
         log.info(f"GameOverBot fetched submission: {submission}")
-        firebasedb.add_active_submission(submission)
+        try:
+            firebasedb.add_active_submission(submission)
+        except Exception as e:
+            log.error(f"GameOverBot error in add_active_submission: {e}")
+
 
 
 def update_submissions(reddit):
     # Get a list of active submissions
-    active_submissions = firebasedb.get_active_submissions()
+    active_submissions = []
+    try:
+        active_submissions = firebasedb.get_active_submissions()
+    except Exception as e:
+        log.error(f"GameOverBot error in add_active_submission: {e}")
     log.info(f"GameOverBot updating {len(active_submissions)} submissions")
 
     active_submission_ids = []
@@ -65,11 +73,17 @@ def update_submissions(reddit):
 
     # Remove stale submissions from db
     log.info(f"GameOverBot removing {len(stale_submission_ids)} stale submissions")
-    firebasedb.remove_stale_submissions(stale_submission_ids)
+    try:
+        firebasedb.remove_stale_submissions(stale_submission_ids)
+    except Exception as e:
+        log.error(f"GameOverBot error in remove_stale_submissions: {e}")
 
     # Store submissions with timestamps in database
     log.info(f"GameOverBot storing {len(submissions)} timestamps")
-    firebasedb.record_submission_timestamps(submissions)
+    try:
+        firebasedb.record_submission_timestamps(submissions)
+    except Exception as e:
+        log.error(f"GameOverBot error in record_submission_timestamps: {e}")
 
     # Schedule anonther call in 60 seconds
     threading.Timer(60.0, update_submissions, (reddit,)).start()
@@ -105,7 +119,10 @@ if __name__ == '__main__':
 
     log.info("[[[[[  GameOverBot v0.9  ]]]]]")
     # connect db
-    firebasedb.init_db_connection()
+    try:
+        firebasedb.init_db_connection()
+    except Exception as e:
+        log.error(e)
 
     # reddit login
     reddit = praw_auth.authenticate()
