@@ -32,14 +32,14 @@ def fetch_submissions(reddit):
     subreddit = reddit.subreddit("Pikabu")
     for reddit_submission in subreddit.stream.submissions():
         submission = Submission_model.from_reddit_submission(reddit_submission)
-        log.debug(f"GameOverBot fetched submission: {submission}")
+        log.info(f"GameOverBot fetched submission: {submission}")
         firebasedb.add_active_submission(submission)
 
 
 def update_submissions(reddit):
     # Get a list of active submissions
     active_submissions = firebasedb.get_active_submissions()
-    log.debug(f"GameOverBot updating {len(active_submissions)} submissions")
+    log.info(f"GameOverBot updating {len(active_submissions)} submissions")
 
     active_submission_ids = []
     active_submissions_dict = {}
@@ -64,11 +64,11 @@ def update_submissions(reddit):
             submissions.append(submission)
 
     # Remove stale submissions from db
-    log.debug(f"GameOverBot removing {len(stale_submission_ids)} stale submissions")
+    log.info(f"GameOverBot removing {len(stale_submission_ids)} stale submissions")
     firebasedb.remove_stale_submissions(stale_submission_ids)
 
     # Store submissions with timestamps in database
-    log.debug(f"GameOverBot storing {len(submissions)} timestamps")
+    log.info(f"GameOverBot storing {len(submissions)} timestamps")
     firebasedb.record_submission_timestamps(submissions)
 
     # Schedule anonther call in 60 seconds
