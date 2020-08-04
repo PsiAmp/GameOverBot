@@ -1,26 +1,45 @@
 import firebasedb as firebasedb
 import praw_auth as praw_auth
-import praw
-from praw.models.reddit.submission import Submission
 from submission_model import Submission_model
-from datetime import datetime
 import time
-import sched
 import threading
+import logging
+import google.cloud.logging
+from google.cloud.logging.handlers import CloudLoggingHandler
+import argparse
+
+# Is assigned to a platform logger
+log = logging.getLogger('cloudLogger')
+
+
+# Parsing command line arguments
+parser = argparse.ArgumentParser()
+parser.add_argument('-debug', action="store_true", default=False)
+args, unknown = parser.parse_known_args()
+is_debug = args.debug
+
+
+# Init logger that will be visible in Global scope
+def init_logger():
+    log.setLevel(logging.INFO)
+    if not is_debug:
+        client = google.cloud.logging.Client()
+        handler = CloudLoggingHandler(client)
+        log.addHandler(handler)
 
 
 def fetch_submissions(reddit):
     subreddit = reddit.subreddit("Pikabu")
     for reddit_submission in subreddit.stream.submissions():
         submission = Submission_model.from_reddit_submission(reddit_submission)
-        print("FETCHED SUBMISSION: ",submission)
+        log.debug(f"GameOverBot fetched submission: {submission}")
         firebasedb.add_active_submission(submission)
 
 
 def update_submissions(reddit):
     # Get a list of active submissions
     active_submissions = firebasedb.get_active_submissions()
-    print(f"Updating {len(active_submissions)} submissions")
+    log.debug(f"GameOverBot updating {len(active_submissions)} submissions")
 
     active_submission_ids = []
     active_submissions_dict = {}
@@ -45,11 +64,11 @@ def update_submissions(reddit):
             submissions.append(submission)
 
     # Remove stale submissions from db
-    print(f"REMOVING {len(stale_submission_ids)} STALE SUBMISSIONS")
+    log.debug(f"GameOverBot removing {len(stale_submission_ids)} stale submissions")
     firebasedb.remove_stale_submissions(stale_submission_ids)
 
     # Store submissions with timestamps in database
-    print(f"Storing {len(submissions)} timestamps")
+    log.debug(f"GameOverBot storing {len(submissions)} timestamps")
     firebasedb.record_submission_timestamps(submissions)
 
     # Schedule anonther call in 60 seconds
@@ -82,11 +101,15 @@ def is_stale(reddit_submission):
 
 
 if __name__ == '__main__':
+    init_logger()
+
+    log.info("[[[[[  GameOverBot v0.9  ]]]]]")
     # connect db
     firebasedb.init_db_connection()
 
     # reddit login
     reddit = praw_auth.authenticate()
+    log.info(f"[[[[[  GameOverBot authenticated as  {reddit.user.me()}  ]]]]]")
 
     # update submissions
     update_submissions(reddit)

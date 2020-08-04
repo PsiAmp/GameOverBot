@@ -2,3 +2,4 @@ matplotlib
 numpy
 praw
 firebase-admin
+google-cloud-logging
