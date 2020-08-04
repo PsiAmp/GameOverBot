@@ -8,7 +8,7 @@ db = None
 
 def init_db_connection():
     global db
-    cred = credentials.Certificate("D:\Projects\Python\GameOverBot\gameoverbot.json")
+    cred = credentials.Certificate("gameoverbot.json")
     firebase_admin.initialize_app(cred)
     db = firestore.client()
 
