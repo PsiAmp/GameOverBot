@@ -3,8 +3,6 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 from submission_model import Submission_model
 
-db = None
-
 
 def init_db_connection():
     global db
@@ -29,19 +27,16 @@ def get_active_submissions():
 def record_submission_timestamps(submissions):
     batch = db.batch()
     for submission in submissions:
-        db_ref = db.collection(u'submissions').document(submission.submission_id)
+        db_ref = db.collection(u'active_submissions_test').document(submission.submission_id)
         doc = db_ref.get()
-        if doc.exists:
-            sub = Submission_model.from_dict(doc.to_dict())
-            score = sub.score
-            score.extend(submission.score)
-            ratio = sub.ratio
-            ratio.extend(submission.ratio)
-            timestamp = sub.timestamp
-            timestamp.extend(submission.timestamp)
-            batch.update(db_ref, {u'score': score, u'ratio': ratio, u'timestamp': timestamp})
-        else:
-            batch.set(db_ref, submission.to_dict())
+        sub = Submission_model.from_dict(doc.to_dict())
+        score = sub.score
+        score.extend(submission.score)
+        ratio = sub.ratio
+        ratio.extend(submission.ratio)
+        timestamp = sub.timestamp
+        timestamp.extend(submission.timestamp)
+        batch.update(db_ref, {u'score': score, u'ratio': ratio, u'timestamp': timestamp})
     batch.commit()
 
 
@@ -69,4 +64,12 @@ def get_submissions():
         submission = Submission_model.from_dict(doc.to_dict())
         submissions.append(submission)
     return submissions
+
+def get_submission(submission_id):
+    doc_ref = db.collection(u'submissions').document(submission_id)
+    doc = doc_ref.get()
+    if doc.exists:
+        return Submission_model.from_dict(doc.to_dict())
+    return None
+
 

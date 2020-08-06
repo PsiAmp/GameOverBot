@@ -1,44 +1,17 @@
-import firebasedb as firebasedb
-import praw_auth as praw_auth
+import firebasedb
+import praw_auth
+import logger_creator
 from submission_model import Submission_model
-import time
-import threading
-import logging
-import google.cloud.logging
-from google.cloud.logging.handlers import CloudLoggingHandler
 import argparse
-
-# Is assigned to a platform logger
-log = logging.getLogger('cloudLogger')
+import time
 
 
-# Parsing command line arguments
-parser = argparse.ArgumentParser()
-parser.add_argument('-debug', action="store_true", default=False)
-args, unknown = parser.parse_known_args()
-is_debug = args.debug
-
-
-# Init logger that will be visible in Global scope
-def init_logger():
-    log.setLevel(logging.INFO)
-    if not is_debug:
-        client = google.cloud.logging.Client()
-        handler = CloudLoggingHandler(client)
-        log.addHandler(handler)
-
-
-def fetch_submissions(reddit):
-    subreddit = reddit.subreddit("Pikabu")
-    for reddit_submission in subreddit.stream.submissions():
-        submission = Submission_model.from_reddit_submission(reddit_submission)
-        log.info(f"GameOverBot fetched submission: {submission}")
-        try:
-            firebasedb.add_active_submission(submission)
-        except Exception as e:
-            log.error(f"GameOverBot error in add_active_submission: {e}")
-
-
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-debug', action="store_true", default=False)
+    args, unknown = parser.parse_known_args()
+    global is_debug
+    is_debug = args.debug
 
 def update_submissions(reddit):
     # Get a list of active submissions
@@ -46,8 +19,8 @@ def update_submissions(reddit):
     try:
         active_submissions = firebasedb.get_active_submissions()
     except Exception as e:
-        log.error(f"GameOverBot error in add_active_submission: {e}")
-    log.info(f"GameOverBot updating {len(active_submissions)} submissions")
+        log.error(f"GameOverBot_recorder error in add_active_submission: {e}")
+    log.info(f"GameOverBot_recorder updating {len(active_submissions)} submissions")
 
     active_submission_ids = []
     active_submissions_dict = {}
@@ -72,21 +45,18 @@ def update_submissions(reddit):
             submissions.append(submission)
 
     # Remove stale submissions from db
-    log.info(f"GameOverBot removing {len(stale_submission_ids)} stale submissions")
+    log.info(f"GameOverBot_recorder removing {len(stale_submission_ids)} stale submissions")
     try:
         firebasedb.remove_stale_submissions(stale_submission_ids)
     except Exception as e:
-        log.error(f"GameOverBot error in remove_stale_submissions: {e}")
+        log.error(f"GameOverBot_recorder error in remove_stale_submissions: {e}")
 
     # Store submissions with timestamps in database
-    log.info(f"GameOverBot storing {len(submissions)} timestamps")
+    log.info(f"GameOverBot_recorder storing {len(submissions)} timestamps")
     try:
         firebasedb.record_submission_timestamps(submissions)
     except Exception as e:
-        log.error(f"GameOverBot error in record_submission_timestamps: {e}")
-
-    # Schedule anonther call in 60 seconds
-    threading.Timer(60.0, update_submissions, (reddit,)).start()
+        log.error(f"GameOverBot_recorder error in record_submission_timestamps: {e}")
 
 
 # Check if submission has an update
@@ -108,28 +78,30 @@ def is_stale(reddit_submission):
         return True
 
     # Not enough upvotes in the first hour
-    if submission_age > 1 * 60 * 60 and reddit_submission.score < 30:
+    if submission_age > 1 * 60 * 60 and reddit_submission.score < 20:
         return True
 
     return False
 
 
 if __name__ == '__main__':
-    init_logger()
+    # Parsing command line arguments
+    parse_args()
 
-    log.info("[[[[[  GameOverBot v0.9  ]]]]]")
+    global log
+    log = logger_creator.init_logger("GameOverBot_recorder_logger", is_debug)
+    log.info("[[[[[  GameOverBot_recorder v0.9  ]]]]]")
+
+    # reddit login
+    reddit = praw_auth.authenticate()
+    log.info(f"[[[[[  GameOverBot_recorder authenticated as  {reddit.user.me()}  ]]]]]")
+
     # connect db
     try:
         firebasedb.init_db_connection()
     except Exception as e:
         log.error(e)
 
-    # reddit login
-    reddit = praw_auth.authenticate()
-    log.info(f"[[[[[  GameOverBot authenticated as  {reddit.user.me()}  ]]]]]")
-
     # update submissions
     update_submissions(reddit)
 
-    # fetch submissions
-    fetch_submissions(reddit)
