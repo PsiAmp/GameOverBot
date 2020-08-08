@@ -16,11 +16,11 @@ def add_active_submission(submission):
 
 
 def add_submission(submission):
-    db.collection(u'submissions').document(submission.submission_id).set(submission.to_dict())
+    db.collection(u'frozen_submissions').document(submission.submission_id).set(submission.to_dict())
 
 
 def get_active_submissions():
-    docs = db.collection(u'active_submissions_test').stream()
+    docs = db.collection(u'active_submissions').stream()
     submissions = []
     for doc in docs:
         submission = Submission_model.from_dict(doc.to_dict())
@@ -31,7 +31,7 @@ def get_active_submissions():
 def record_submission_timestamps(submissions):
     batch = db.batch()
     for submission in submissions:
-        db_ref = db.collection(u'active_submissions_test').document(submission.submission_id)
+        db_ref = db.collection(u'active_submissions').document(submission.submission_id)
         doc = db_ref.get()
         sub = Submission_model.from_dict(doc.to_dict())
         score = sub.score
@@ -47,13 +47,13 @@ def record_submission_timestamps(submissions):
 def remove_stale_submissions(stale_submission_ids):
     batch = db.batch()
     for submission_id in stale_submission_ids:
-        db_ref = db.collection(u'active_submissions_test').document(submission_id)
+        db_ref = db.collection(u'active_submissions').document(submission_id)
         batch.delete(db_ref)
     batch.commit()
 
 
 def clear_database():
-    docs = db.collection(u'submissions').stream()
+    docs = db.collection(u'frozen_submissions').stream()
     for doc in docs:
         history_docs = doc.collection(u'score_history').stream()
         for his_doc in history_docs:
@@ -62,7 +62,7 @@ def clear_database():
 
 
 def get_submissions():
-    docs = db.collection(u'submissions').stream()
+    docs = db.collection(u'frozen_submissions').stream()
     submissions = []
     for doc in docs:
         submission = Submission_model.from_dict(doc.to_dict())
@@ -70,7 +70,7 @@ def get_submissions():
     return submissions
 
 def get_submission(submission_id):
-    doc_ref = db.collection(u'submissions').document(submission_id)
+    doc_ref = db.collection(u'frozen_submissions').document(submission_id)
     doc = doc_ref.get()
     if doc.exists:
         return Submission_model.from_dict(doc.to_dict())
