@@ -104,11 +104,10 @@ if __name__ == '__main__':
 
     global log
     log = logger_creator.init_logger("GameOverBot_recorder_logger", is_debug)
-    log.info("[[[[[  GameOverBot_recorder v0.9  ]]]]]")
 
     # reddit login
     reddit = praw_auth.authenticate()
-    log.info(f"[[[[[  GameOverBot_recorder authenticated as  {reddit.user.me()}  ]]]]]")
+    log.info(f"[[[[[  GameOverBot_recorder v0.9.1 authenticated as  {reddit.user.me()}  ]]]]]")
 
     # connect db
     try:

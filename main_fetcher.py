@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     global log
     log = logger_creator.init_logger("GameOverBot_fetcher_logger", is_debug)
-    log.info("[[[[[  GameOverBot_fetcher v0.9  ]]]]]")
+    log.info("[[[[[  GameOverBot_fetcher v0.9.1  ]]]]]")
 
     # connect db
     try:
