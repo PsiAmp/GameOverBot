@@ -12,7 +12,7 @@ def init_db_connection():
 
 
 def add_active_submission(submission):
-    db.collection(u'active_submissions_test').document(submission.submission_id).set(submission.to_dict())
+    db.collection(u'active_submissions').document(submission.submission_id).set(submission.to_dict())
 
 
 def add_submission(submission):
