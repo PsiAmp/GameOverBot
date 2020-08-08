@@ -15,6 +15,10 @@ def add_active_submission(submission):
     db.collection(u'active_submissions_test').document(submission.submission_id).set(submission.to_dict())
 
 
+def add_submission(submission):
+    db.collection(u'submissions').document(submission.submission_id).set(submission.to_dict())
+
+
 def get_active_submissions():
     docs = db.collection(u'active_submissions_test').stream()
     submissions = []
@@ -42,8 +46,8 @@ def record_submission_timestamps(submissions):
 
 def remove_stale_submissions(stale_submission_ids):
     batch = db.batch()
-    for id in stale_submission_ids:
-        db_ref = db.collection(u'active_submissions_test').document(id)
+    for submission_id in stale_submission_ids:
+        db_ref = db.collection(u'active_submissions_test').document(submission_id)
         batch.delete(db_ref)
     batch.commit()
 
@@ -71,5 +75,6 @@ def get_submission(submission_id):
     if doc.exists:
         return Submission_model.from_dict(doc.to_dict())
     return None
+
 
 

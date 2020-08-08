@@ -20,7 +20,6 @@ def update_submissions(reddit):
         active_submissions = firebasedb.get_active_submissions()
     except Exception as e:
         log.error(f"GameOverBot_recorder error in add_active_submission: {e}")
-    log.info(f"GameOverBot_recorder updating {len(active_submissions)} submissions")
 
     active_submission_ids = []
     active_submissions_dict = {}
@@ -37,26 +36,38 @@ def update_submissions(reddit):
         if is_stale(reddit_submission):
             stale_submission_ids.append(reddit_submission.id)
         # Ignore submission with less than 1 upvote
-        elif not is_update_needed(reddit_submission, active_submissions_dict[reddit_submission.id]):
-            continue
-        else:
+        elif is_update_needed(reddit_submission, active_submissions_dict[reddit_submission.id]):
             # Create submission with current timestamp
             submission = Submission_model.from_reddit_submission(reddit_submission)
             submissions.append(submission)
 
     # Remove stale submissions from db
-    log.info(f"GameOverBot_recorder removing {len(stale_submission_ids)} stale submissions")
     try:
         firebasedb.remove_stale_submissions(stale_submission_ids)
     except Exception as e:
         log.error(f"GameOverBot_recorder error in remove_stale_submissions: {e}")
 
+    # Add active submission to permanent storage
+    for sub_id in stale_submission_ids:
+        submission = active_submissions_dict[sub_id]
+        if is_valuable_for_permarecord(submission):
+            try:
+                firebasedb.add_submission(submission)
+            except Exception as e:
+                log.error(f"GameOverBot_recorder error in add_submission: {e}")
+
     # Store submissions with timestamps in database
-    log.info(f"GameOverBot_recorder storing {len(submissions)} timestamps")
     try:
         firebasedb.record_submission_timestamps(submissions)
     except Exception as e:
         log.error(f"GameOverBot_recorder error in record_submission_timestamps: {e}")
+
+    log.info(f"GameOverBot_recorder updating {len(active_submissions)} submissions; storing {len(submissions)} timestamps; removing {len(stale_submission_ids)} stale")
+
+
+def is_valuable_for_permarecord(submission):
+    submission_age = time.time() - submission.created_utc
+    return submission_age > 6 * 60 * 60 and submission.score[-1] >= 100 and len(submission.score) > 20
 
 
 # Check if submission has an update
@@ -65,8 +76,11 @@ def is_update_needed(reddit_submission, submission):
         return False
     if len(submission.score) == 0:
         return True
-    if reddit_submission.score - submission.score[-1] < 2:
+
+    delta = reddit_submission.score - submission.score[-1]
+    if delta < 2 or delta < reddit_submission.score * 0.1:
         return False
+
     return True
 
 

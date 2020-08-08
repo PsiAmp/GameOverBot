@@ -31,3 +31,10 @@ cp /opt/gameoverbot/conf/gameoverbot-app.conf /etc/supervisor/conf.d/gameoverbot
 supervisorctl reread
 supervisorctl update
 EOF
+
+# Cron job
+sudo crontab -e
+*/1 * * * * cd /opt/gameoverbot/ && /opt/gameoverbot/env/bin/python /opt/gameoverbot/main_recorder.py
+# Crontab sends errors to mail. Postfix mail service should be installed.
+# Check mail for local errors
+sudo nano /var/spool/mail/root

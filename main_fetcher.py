@@ -15,7 +15,7 @@ def parse_args():
 
 def fetch_submissions(reddit):
     subreddit = reddit.subreddit("Pikabu")
-    for reddit_submission in subreddit.stream.submissions():
+    for reddit_submission in subreddit.stream.submissions(skip_existing=True):
         submission = Submission_model.from_reddit_submission(reddit_submission)
         log.info(f"GameOverBot_fetcher fetched submission: {submission}")
         try:
