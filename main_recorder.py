@@ -78,7 +78,7 @@ def is_update_needed(reddit_submission, submission):
         return True
 
     delta = reddit_submission.score - submission.score[-1]
-    if delta < 2 or delta < reddit_submission.score * 0.1:
+    if abs(delta) < 2 or abs(delta) < reddit_submission.score * 0.1:
         return False
 
     return True
@@ -91,8 +91,8 @@ def is_stale(reddit_submission):
     if submission_age > 6 * 60 * 60:
         return True
 
-    # Not enough upvotes in the first hour
-    if submission_age > 1 * 60 * 60 and reddit_submission.score < 20:
+    # Not enough upvotes
+    if submission_age > 1 * 60 * 60 and reddit_submission.score < 10:
         return True
 
     return False

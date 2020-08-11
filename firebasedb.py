@@ -61,13 +61,14 @@ def clear_database():
         doc.delete()
 
 
-def get_submissions():
+def get_frozen_submissions():
     docs = db.collection(u'frozen_submissions').stream()
     submissions = []
     for doc in docs:
         submission = Submission_model.from_dict(doc.to_dict())
         submissions.append(submission)
     return submissions
+
 
 def get_submission(submission_id):
     doc_ref = db.collection(u'frozen_submissions').document(submission_id)
