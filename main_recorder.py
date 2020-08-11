@@ -62,7 +62,7 @@ def update_submissions(reddit):
     except Exception as e:
         log.error(f"GameOverBot_recorder error in record_submission_timestamps: {e}")
 
-    log.info(f"GameOverBot_recorder updating {len(active_submissions)} submissions; storing {len(submissions)} timestamps; removing {len(stale_submission_ids)} stale")
+    # log.info(f"GameOverBot_recorder updating {len(active_submissions)} submissions; storing {len(submissions)} timestamps; removing {len(stale_submission_ids)} stale")
 
 
 def is_valuable_for_permarecord(submission):
