@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import firebasedb as firebasedb
+import numpy as np
 
 def show_submissions():
     firebasedb.init_db_connection()
@@ -35,7 +36,6 @@ def show_submissions():
             line2 = ax2.plot(timestamps, submission.ratio, color='tab:red')
 
             plt.suptitle(f'{submission.author_name} {submission.title}')
-
             print(submission)
     print('the end')
 

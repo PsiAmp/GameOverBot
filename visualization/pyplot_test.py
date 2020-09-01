@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+import urllib
+import urllib.request
 
 fig, ax1 = plt.subplots()
 
@@ -14,5 +16,12 @@ ax2.set_ylim([0.0, 1.0])
 ax2.plot(data_x, data_y2, color='tab:red')
 
 #fig.tight_layout()
+
+ax3 = ax2.twinx()
+f = urllib.request.urlopen("http://matplotlib.sourceforge.net/_static/logo2.png")
+a = plt.imread(f)
+plt.imshow(a)
+
+
 plt.show()
 
