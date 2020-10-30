@@ -34,7 +34,7 @@ EOF
 
 # Cron job
 sudo crontab -e
-*/1 * * * * cd /opt/gameoverbot/ && /opt/gameoverbot/env/bin/python /opt/gameoverbot/main_recorder.py
+*/2 * * * * cd /opt/gameoverbot/ && /opt/gameoverbot/env/bin/python /opt/gameoverbot/main_recorder.py
 # Crontab sends errors to mail. Postfix mail service should be installed.
 # Check mail for local errors
 sudo nano /var/spool/mail/root

@@ -92,10 +92,14 @@ def is_stale(reddit_submission):
         return True
 
     # Not enough upvotes
-    if submission_age > 1 * 60 * 60 and reddit_submission.score < 10:
+    if submission_age > 1 * 60 * 60 and reddit_submission.score < 10 and not is_special_interest(reddit_submission):
         return True
 
     return False
+
+
+def is_special_interest(reddit_submission):
+    return reddit_submission.author.name == "Lighthouse-scout"
 
 
 if __name__ == '__main__':
