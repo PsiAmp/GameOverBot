@@ -41,6 +41,9 @@ def update_submissions(reddit):
             submission = Submission_model.from_reddit_submission(reddit_submission)
             submissions.append(submission)
 
+    log.info(f"GameOverBot_recorder stale: {len(stale_submission_ids)} ")
+    log.info(f"GameOverBot_recorder active: {len(submissions)} ")
+
     # Remove stale submissions from db
     try:
         firebasedb.remove_stale_submissions(stale_submission_ids)
@@ -120,6 +123,7 @@ if __name__ == '__main__':
     except Exception as e:
         log.error(e)
 
+    log.info(f"updating submissions")
     # update submissions
     update_submissions(reddit)
 
