@@ -14,12 +14,14 @@ def parse_args():
     is_debug = args.debug
 
 def update_submissions(reddit):
+    log.info(f"GameOverBot_recorder 1")
     # Get a list of active submissions
     active_submissions = []
     try:
         active_submissions = firebasedb.get_active_submissions()
     except Exception as e:
         log.error(f"GameOverBot_recorder error in add_active_submission: {e}")
+    log.info(f"GameOverBot_recorder active len: {len(active_submissions)}")
 
     active_submission_ids = []
     active_submissions_dict = {}
@@ -29,6 +31,7 @@ def update_submissions(reddit):
         # build dictionary
         active_submissions_dict[sub.submission_id] = sub
 
+    log.info(f"GameOverBot_recorder 2")
     submissions = []
     stale_submission_ids = []
     for reddit_submission in reddit.info(active_submission_ids):
