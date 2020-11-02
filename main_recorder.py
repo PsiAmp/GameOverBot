@@ -35,11 +35,14 @@ def update_submissions(reddit):
     submissions = []
     stale_submission_ids = []
     for reddit_submission in reddit.info(active_submission_ids):
+        log.info("reddit_submission 1 ")
         # Collect stale submissions
         if is_stale(reddit_submission):
             stale_submission_ids.append(reddit_submission.id)
+            log.info("reddit_submission 2 ")
         # Ignore submission with less than 1 upvote
         elif is_update_needed(reddit_submission, active_submissions_dict[reddit_submission.id]):
+            log.info("reddit_submission 3 ")
             # Create submission with current timestamp
             submission = Submission_model.from_reddit_submission(reddit_submission)
             submissions.append(submission)
@@ -93,19 +96,22 @@ def is_update_needed(reddit_submission, submission):
 
 def is_stale(reddit_submission):
     submission_age = time.time() - reddit_submission.created_utc
-
+    log.info("is stale 1 ")
     # Submission is too old
     if submission_age > 6 * 60 * 60:
         return True
-
+    log.info("is stale 1111 ")
     # Not enough upvotes
     if submission_age > 1 * 60 * 60 and reddit_submission.score < 10 and not is_special_interest(reddit_submission):
         return True
+
+    log.info("is stale 2 ")
 
     return False
 
 
 def is_special_interest(reddit_submission):
+    log.info("is special")
     return reddit_submission.author.name == "Lighthouse-scout"
 
 
