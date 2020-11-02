@@ -56,6 +56,7 @@ def update_submissions(reddit):
             except Exception as e:
                 log.error(f"GameOverBot_recorder error in add_submission: {e}")
 
+    log.info(f"GameOverBot_recorder recording timestamps for {len(submissions)} submissions")
     # Store submissions with timestamps in database
     try:
         firebasedb.record_submission_timestamps(submissions)
