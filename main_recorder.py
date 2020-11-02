@@ -14,14 +14,12 @@ def parse_args():
     is_debug = args.debug
 
 def update_submissions(reddit):
-    log.info(f"GameOverBot_recorder 1")
     # Get a list of active submissions
     active_submissions = []
     try:
         active_submissions = firebasedb.get_active_submissions()
     except Exception as e:
         log.error(f"GameOverBot_recorder error in add_active_submission: {e}")
-    log.info(f"GameOverBot_recorder active len: {len(active_submissions)}")
 
     active_submission_ids = []
     active_submissions_dict = {}
@@ -31,24 +29,17 @@ def update_submissions(reddit):
         # build dictionary
         active_submissions_dict[sub.submission_id] = sub
 
-    log.info(f"GameOverBot_recorder 2")
     submissions = []
     stale_submission_ids = []
     for reddit_submission in reddit.info(active_submission_ids):
-        log.info("reddit_submission 1 ")
         # Collect stale submissions
         if is_stale(reddit_submission):
             stale_submission_ids.append(reddit_submission.id)
-            log.info("reddit_submission 2 ")
         # Ignore submission with less than 1 upvote
         elif is_update_needed(reddit_submission, active_submissions_dict[reddit_submission.id]):
-            log.info("reddit_submission 3 ")
             # Create submission with current timestamp
             submission = Submission_model.from_reddit_submission(reddit_submission)
             submissions.append(submission)
-
-    log.info(f"GameOverBot_recorder stale: {len(stale_submission_ids)} ")
-    log.info(f"GameOverBot_recorder active: {len(submissions)} ")
 
     # Remove stale submissions from db
     try:
@@ -65,7 +56,6 @@ def update_submissions(reddit):
             except Exception as e:
                 log.error(f"GameOverBot_recorder error in add_submission: {e}")
 
-    log.info(f"GameOverBot_recorder recording timestamps for {len(submissions)} submissions")
     # Store submissions with timestamps in database
     try:
         firebasedb.record_submission_timestamps(submissions)
@@ -96,23 +86,20 @@ def is_update_needed(reddit_submission, submission):
 
 def is_stale(reddit_submission):
     submission_age = time.time() - reddit_submission.created_utc
-    log.info("is stale 1 ")
+
     # Submission is too old
     if submission_age > 6 * 60 * 60:
         return True
-    log.info("is stale 1111 ")
+
     # Not enough upvotes
     if submission_age > 1 * 60 * 60 and reddit_submission.score < 10 and not is_special_interest(reddit_submission):
         return True
-
-    log.info("is stale 2 ")
 
     return False
 
 
 def is_special_interest(reddit_submission):
-    log.info("is special")
-    return reddit_submission.author.name == "Lighthouse-scout"
+    return not reddit_submission.author or reddit_submission.author.name == "Lighthouse-scout"
 
 
 if __name__ == '__main__':
@@ -124,7 +111,7 @@ if __name__ == '__main__':
 
     # reddit login
     reddit = praw_auth.authenticate()
-    log.info(f"[[[[[  GameOverBot_recorder v0.9.1 authenticated as  {reddit.user.me()}  ]]]]]")
+    # log.info(f"[[[[[  GameOverBot_recorder v0.9.1 authenticated as  {reddit.user.me()}  ]]]]]")
 
     # connect db
     try:
@@ -132,7 +119,6 @@ if __name__ == '__main__':
     except Exception as e:
         log.error(e)
 
-    log.info(f"updating submissions")
     # update submissions
     update_submissions(reddit)
 
