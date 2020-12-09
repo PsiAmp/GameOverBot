@@ -99,7 +99,7 @@ def is_stale(reddit_submission):
 
 
 def is_special_interest(reddit_submission):
-    return not reddit_submission.author or reddit_submission.author.name == "Lighthouse-scout"
+    return reddit_submission.author and (reddit_submission.author.name == "Lighthouse-scout" or reddit_submission.author.name == "Eugen0242")
 
 
 if __name__ == '__main__':
