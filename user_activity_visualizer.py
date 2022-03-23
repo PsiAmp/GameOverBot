@@ -12,16 +12,16 @@ def parse_args():
     is_debug = args.debug
 
 
-def fetch_comments(reddit, user_name, limit=None, max_days=None):
-    md = 0
+def fetch_comments(reddit, user_name, limit=None, date_start=None, date_end=None):
     comments = []
     for comment in reddit.redditor(user_name).comments.new(limit=limit):
-        if max_days is not None and max_days < days_old(comment.created_utc):
+        date = datetime.fromtimestamp(comment.created_utc)
+        if date_start and date < date_start:
             break
+        if date_end and date_end < date:
+            continue
 
         comments.append(comment)
-        md = max(md, days_old(comment.created_utc))
-    print(md)
 
     return comments
 
@@ -44,16 +44,16 @@ def days_old(t_utc):
     return days_diff
 
 
-def is_date_in_range(date_start, date_end, date):
+def days_delta(d1, d2):
+    return abs((d1 - d2).days)
 
-    return False
 
-def create_z_data(posts):
-    z = [[0] * 24 for _ in range(max_days + 1)]
+def create_z_data(posts, date_start, date_end):
+    z = [[0] * 24 for _ in range(days_delta(date_end, date_start) + 1)]
 
     for post in posts:
         hour = datetime.fromtimestamp(post.created_utc).hour
-        day_num = days_old(post.created_utc)
+        day_num = days_delta(date_end, datetime.fromtimestamp(post.created_utc))
 
         try:
             z[day_num][hour] += 1
@@ -73,11 +73,12 @@ if __name__ == '__main__':
     # reddit login
     reddit = praw_auth.authenticate()
 
-    max_days = 1000
-    username = 'lowrussianprice'
+    date_end = datetime(2022, 3, 23)
+    date_start = datetime(2022, 2, 15)
+    username = 'angrybombus'
 
     # fetch submissions
-    comments = fetch_comments(reddit, username)
+    comments = fetch_comments(reddit, username, date_start=date_start, date_end=date_end)
     #submissions = fetch_submissions(reddit, username, max_days=max_days)
     #comments.extend(submissions)
 
@@ -85,11 +86,11 @@ if __name__ == '__main__':
     x = list(range(24))
 
     y = []
-    for days_delta in range(0, max_days):
-        d = datetime.today() - timedelta(days=days_delta)
+    for days in range(0, days_delta(date_end, date_start)):
+        d = date_end - timedelta(days=days)
         y.append(d.strftime('%Y-%m-%d'))
 
-    z = create_z_data(comments)
+    z = create_z_data(comments, date_start=date_start, date_end=date_end)
 
     # show graph
     fig = go.Figure(data=go.Heatmap(
