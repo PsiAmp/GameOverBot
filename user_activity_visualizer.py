@@ -75,7 +75,7 @@ if __name__ == '__main__':
 
     date_end = datetime(2022, 3, 23)
     date_start = datetime(2022, 2, 15)
-    username = 'angrybombus'
+    username = 'username'
 
     # fetch submissions
     comments = fetch_comments(reddit, username, date_start=date_start, date_end=date_end)
