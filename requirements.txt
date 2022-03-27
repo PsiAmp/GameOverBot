@@ -1,5 +1,6 @@
-matplotlib
-numpy
-praw
+matplotlib~=3.5.1
+numpy~=1.22.3
+praw~=7.5.0
 firebase-admin
 google-cloud-logging
+plotly~=5.6.0
