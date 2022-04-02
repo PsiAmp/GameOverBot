@@ -102,6 +102,8 @@ class UserActivityScanner:
             hoverongaps=False,
             zmax=10
         ))
+        #html = fig.to_html()
+        #fig.write_image(f'{self.username}.png')
         fig.show()
 
 
@@ -117,8 +119,8 @@ if __name__ == '__main__':
     # Parsing command line arguments
     parse_args()
 
-    u = UserActivityScanner(username='spez',
-                            date_from=datetime(2021, 1, 1),
+    u = UserActivityScanner(username='ace13pikabu',
+                            date_from=datetime(2022, 2, 1),
                             date_to=datetime.today(),
                             scan_comments=True,
                             scan_submissions=True)
