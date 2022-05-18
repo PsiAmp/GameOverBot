@@ -1,3 +1,4 @@
+import sys
 import praw_auth
 import argparse
 from datetime import datetime, timedelta
@@ -119,8 +120,18 @@ if __name__ == '__main__':
     # Parsing command line arguments
     parse_args()
 
-    u = UserActivityScanner(username='ace13pikabu',
+    username = 'test'
+    if len(sys.argv) > 1:
+        username = sys.argv[1]
+    scan_comments = True
+    if len(sys.argv) > 2:
+        scan_comments = sys.argv[2]
+    scan_submissions = True
+    if len(sys.argv) > 3:
+        scan_comments = sys.argv[3]
+
+    u = UserActivityScanner(username=username,
                             date_from=datetime(2022, 2, 1),
                             date_to=datetime.today(),
-                            scan_comments=True,
-                            scan_submissions=True)
+                            scan_comments=scan_comments,
+                            scan_submissions=scan_submissions)
